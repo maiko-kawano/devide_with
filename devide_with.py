@@ -1,4 +1,3 @@
-
 import cv2
 import os
 import shutil
@@ -7,6 +6,8 @@ import pyocr
 import pyocr.builders
 from pathlib import Path
 
+print(os.getcwd())
+
 def get_paths(input_dir, exts=None):
     paths = sorted([x for x in input_dir.glob("**/*")])
     if exts:
@@ -14,14 +15,16 @@ def get_paths(input_dir, exts=None):
 
     return paths
 
-input_dir = Path(r"D:\★かのい\APEX\Outplayed\Apex Legends")
+input_dir = Path(r"D:\kanoi\APEX\Outplayed\Apex Legends")
 
 output_dir = Path("output")
 output_dir.mkdir(exist_ok=True)
 
 for path in get_paths(input_dir, exts=[".mp4"]):
+
     def save_frame_sec(video_path, sec, result_path):
         cap = cv2.VideoCapture(str(path))
+        print(str(path))
 
         if not cap.isOpened():
             return
@@ -36,24 +39,28 @@ for path in get_paths(input_dir, exts=[".mp4"]):
 
         if ret:
             cv2.imwrite(result_path, frame)
+            return frame
 
    
-    save_frame_sec(str(path), 3, r"C:\Users\mymai\OneDrive\デスクトップ\APEX.jpg")
+    save_frame_sec(str(path), 11, r"D:\kanoi\APEX\APEX.jpg")
     
     path_tesseract = r"C:\Program Files\Tesseract-OCR"
-    if path_tesseract not in os.environ["PATH"].split(os.pathsep):
-        os.environ["PATH"] += os.pathsep + path_tesseract
+    if path_tesseract not in os.environ["Path"].split(os.pathsep):
+        os.environ["Path"] += os.pathsep + path_tesseract
 
     tools = pyocr.get_available_tools()
     tool = tools[0]
 
     builder = pyocr.builders.TextBuilder(tesseract_layout=6)
-    img = Image.open(r"C:\Users\mymai\OneDrive\デスクトップ\APEX.jpg")
-    for n in range(36):
-        img_box = img.crop((90, 525+n, 171, 583))
-        new_img = img_box.resize((556, 250))
+    img = Image.open(r"D:\kanoi\APEX\APEX.jpg")
+    for n in range(20):
+        img_box = img.crop((133, 768+n, 285, 875))
+        new_img = img_box.resize((304, 174))
         img_g = new_img.convert('L')
-        img_rgb = img_g.convert("RGB")
+        enhancer= ImageEnhance.Contrast(img_g)
+        img_con = enhancer.enhance(1.0)
+        img_rgb = img_con.convert("RGB")
+        img_rgb.save(r"D:\kanoi\APEX\APEX_1.jpg")
         pixels = img_rgb.load()
         c_max = 155
         for j in range(img_rgb.size[1]):
@@ -65,11 +72,17 @@ for path in get_paths(input_dir, exts=[".mp4"]):
         img_con = enhancer.enhance(2.0)
         builder = pyocr.builders.TextBuilder(tesseract_layout=6)
         result = tool.image_to_string(img_con , lang='jpn+eng', builder=builder)
+        result = result.replace(" ", "")
         print(result)
 
-        if "tnmm" in result or "3171" in result:
-            shutil.move(str(path), r"D:\★かのい\APEX\APEX\えいきくん")
+        if "クリバに" in result or "クリバ" in result:
+            shutil.move(str(path), r"D:\kanoi\APEX\Buney")
+            break
+
+        if "POC" in result:
+            shutil.move(str(path), r"D:\kanoi\APEX\POC")
             break
 
 
-shutil.move(r"D:\★かのい\APEX\APEX.jpg", r"ごみ箱")
+shutil.move(r"D:\kanoi\APEX\APEX.jpg", r"D:\kanoi\APEX\dustbox")
+shutil.move(r"D:\kanoi\APEX\APEX_1.jpg", r"D:\kanoi\APEX\dustbox")
